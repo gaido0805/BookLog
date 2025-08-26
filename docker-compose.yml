@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: booklog_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: booklog
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: booklog
+      MYSQL_PASSWORD: booklog
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - booklog_network
+
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: booklog_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - booklog_network
+
+  # Laravel API
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: booklog_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api:/var/www/html
+      - /var/www/html/vendor
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: booklog
+      DB_USERNAME: booklog
+      DB_PASSWORD: booklog
+    depends_on:
+      - mysql
+    networks:
+      - booklog_network
+
+  # Nuxt Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: booklog_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - API_BASE_URL=http://localhost:8000
+    depends_on:
+      - api
+    networks:
+      - booklog_network
+
+volumes:
+  mysql_data:
+
+networks:
+  booklog_network:
+    driver: bridge
