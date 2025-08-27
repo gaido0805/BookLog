@@ -79,12 +79,14 @@ export default {
   },
   async fetch() {
     try {
-      const response = await this.$axios.get(`/books/${this.$route.params.id}`)
-      const book = response.data.book
-      this.form = {
-        title: book.title,
-        read_date: book.read_date,
-        impression: book.impression
+      if (this.$auth) {
+        const response = await this.$auth.apiRequest(`/api/books/${this.$route.params.id}`)
+        const book = response.book
+        this.form = {
+          title: book.title,
+          read_date: book.read_date,
+          impression: book.impression
+        }
       }
     } catch (error) {
       console.error('読書ログの取得に失敗しました:', error)
@@ -97,8 +99,13 @@ export default {
     async updateBook() {
       this.updating = true
       try {
-        await this.$axios.put(`/books/${this.$route.params.id}`, this.form)
-        this.$router.push('/')
+        if (this.$auth) {
+          await this.$auth.apiRequest(`/api/books/${this.$route.params.id}`, {
+            method: 'PUT',
+            body: JSON.stringify(this.form)
+          })
+          this.$router.push('/')
+        }
       } catch (error) {
         console.error('読書ログの更新に失敗しました:', error)
         alert('読書ログの更新に失敗しました。入力内容を確認してください。')
