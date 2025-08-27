@@ -60,7 +60,7 @@
         <!-- 統計情報 -->
         <div class="w-1/3 mb-6 bg-white rounded-lg shadow-sm border border-gray-100 p-2">
           <div class="flex items-center justify-center">
-            <div class="text-md text-gray-500 font-medium">総読書数：</div>
+            <div class="text-md text-gray-500 font-medium">総ログ数：</div>
             <div class="text-md font-semibold text-blue-600">{{ totalBooks }}</div>
           </div>
         </div>
@@ -70,12 +70,15 @@
           <div
             v-for="book in paginatedBooks"
             :key="book.id"
-            class="bg-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+            class="bg-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer"
+            @click="goToDetail(book.id)"
           >
             <div class="p-6">
               <div class="flex items-start justify-between mb-4">
-                <h3 class="text-xl font-semibold text-gray-900 line-clamp-1 flex-1 mr-3 min-w-0">{{ book.title }}</h3>
-                <div class="flex space-x-2 flex-shrink-0">
+                <div class="flex-1 mr-3 min-w-0">
+                  <h3 class="text-xl font-semibold text-gray-900 line-clamp-1">{{ book.title }}</h3>
+                </div>
+                <div class="flex space-x-2 flex-shrink-0" @click.stop>
                   <NuxtLink
                     :to="`/books/${book.id}/edit`"
                     class="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full hover:bg-green-200 transition-colors duration-200"
@@ -243,6 +246,9 @@ export default {
         // ページトップにスクロール
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }
+    },
+    goToDetail(id) {
+      this.$router.push(`/books/${id}`)
     },
     async deleteBook(id) {
       if (confirm('この読書ログを削除しますか？')) {
