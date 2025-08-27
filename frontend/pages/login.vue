@@ -66,10 +66,23 @@ export default {
       loading: false
     }
   },
+  mounted() {
+    // ページ読み込み時に認証状態をチェック
+    this.checkAuthStatus()
+  },
   methods: {
+    checkAuthStatus() {
+      if (this.$auth && this.$auth.isAuthenticated()) {
+        this.$router.push('/')
+      }
+    },
     async login() {
       this.loading = true
       try {
+        if (!this.$auth) {
+          throw new Error('認証サービスが利用できません')
+        }
+        
         await this.$auth.login(this.form)
         this.$router.push('/')
       } catch (error) {

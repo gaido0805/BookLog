@@ -4,8 +4,6 @@
       <div class="container mx-auto flex justify-between items-center">
         <NuxtLink to="/" class="text-xl font-bold">BookLog</NuxtLink>
         <div v-if="isAuthenticated" class="flex items-center space-x-4">
-          <NuxtLink to="/" class="hover:text-blue-200">読書ログ</NuxtLink>
-          <NuxtLink to="/books/create" class="hover:text-blue-200">新規登録</NuxtLink>
           <button @click="logout" class="hover:text-blue-200">ログアウト</button>
         </div>
         <div v-else>

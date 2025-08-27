@@ -92,7 +92,16 @@ export default {
       loading: false
     }
   },
+  mounted() {
+    // ページ読み込み時に認証状態をチェック
+    this.checkAuthStatus()
+  },
   methods: {
+    checkAuthStatus() {
+      if (this.$auth && this.$auth.isAuthenticated()) {
+        this.$router.push('/')
+      }
+    },
     async register() {
       if (this.form.password !== this.form.password_confirmation) {
         alert('パスワードが一致しません')

@@ -1,11 +1,24 @@
 import Cookies from 'js-cookie'
 
-export default ({ redirect, app }) => {
+export default function ({ app }, inject) {
+  console.log('認証プラグインが読み込まれました')
+  
+  // APIのベースURL
+  const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8000'
+  
+  // 認証状態変更イベントを発火する関数
+  const emitAuthChange = () => {
+    if (process.client) {
+      window.dispatchEvent(new CustomEvent('auth-state-changed'))
+    }
+  }
+  
   // 認証関連のメソッドをグローバルに追加
-  app.$auth = {
+  const auth = {
     register: async (userData) => {
+      console.log('register メソッドが呼び出されました')
       try {
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -17,15 +30,20 @@ export default ({ redirect, app }) => {
           throw new Error('Registration failed')
         }
         
-        return await response.json()
+        const data = await response.json()
+        const token = data.token
+        Cookies.set('auth_token', token, { expires: 7 })
+        emitAuthChange()
+        return data
       } catch (error) {
         throw error
       }
     },
     
     login: async (credentials) => {
+      console.log('login メソッドが呼び出されました', credentials)
       try {
-        const response = await fetch('/api/login', {
+        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -40,8 +58,10 @@ export default ({ redirect, app }) => {
         const data = await response.json()
         const token = data.token
         Cookies.set('auth_token', token, { expires: 7 })
+        emitAuthChange()
         return data
       } catch (error) {
+        console.error('ログインエラー:', error)
         throw error
       }
     },
@@ -49,7 +69,7 @@ export default ({ redirect, app }) => {
     logout: async () => {
       try {
         const token = Cookies.get('auth_token')
-        await fetch('/api/logout', {
+        await fetch(`${API_BASE_URL}/api/auth/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -60,14 +80,18 @@ export default ({ redirect, app }) => {
         console.error('Logout error:', error)
       } finally {
         Cookies.remove('auth_token')
-        redirect('/login')
+        emitAuthChange()
+        // ログアウト後にログインページにリダイレクト
+        if (app.router) {
+          app.router.push('/login')
+        }
       }
     },
     
     getUser: async () => {
       try {
         const token = Cookies.get('auth_token')
-        const response = await fetch('/api/user', {
+        const response = await fetch(`${API_BASE_URL}/api/auth/user`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -102,7 +126,7 @@ export default ({ redirect, app }) => {
         }
       }
       
-      const response = await fetch(url, {
+      const response = await fetch(`${API_BASE_URL}${url}`, {
         ...defaultOptions,
         ...options
       })
@@ -114,4 +138,8 @@ export default ({ redirect, app }) => {
       return response.json()
     }
   }
+
+  // inject関数を使用して$authをグローバルに追加
+  inject('auth', auth)
+  console.log('$auth が注入されました')
 }

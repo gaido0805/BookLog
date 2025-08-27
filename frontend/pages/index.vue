@@ -6,7 +6,7 @@
         to="/books/create"
         class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
       >
-        新規登録
+        ログ登録
       </NuxtLink>
     </div>
 
@@ -63,10 +63,13 @@ export default {
   },
   async fetch() {
     try {
-      const response = await this.$axios.get('/books')
-      this.books = response.data.books
+      if (this.$auth) {
+        const response = await this.$auth.apiRequest('/api/books')
+        this.books = response.books || []
+      }
     } catch (error) {
       console.error('読書ログの取得に失敗しました:', error)
+      this.books = []
     } finally {
       this.loading = false
     }
@@ -78,12 +81,14 @@ export default {
     async deleteBook(id) {
       if (confirm('この読書ログを削除しますか？')) {
         try {
-          await this.$axios.delete(`/books/${id}`)
-          this.books = this.books.filter(book => book.id !== id)
-          this.$toast.success('読書ログを削除しました')
+          if (this.$auth) {
+            await this.$auth.apiRequest(`/api/books/${id}`, { method: 'DELETE' })
+            this.books = this.books.filter(book => book.id !== id)
+            alert('読書ログを削除しました')
+          }
         } catch (error) {
           console.error('削除に失敗しました:', error)
-          this.$toast.error('削除に失敗しました')
+          alert('削除に失敗しました')
         }
       }
     }
