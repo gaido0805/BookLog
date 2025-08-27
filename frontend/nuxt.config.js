@@ -21,6 +21,7 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
+    '~/plugins/auth.js'
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -33,29 +34,12 @@ export default {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
-    '@nuxtjs/axios',
-    '@nuxtjs/auth-module'
   ],
 
-  // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  axios: {
-    baseURL: process.env.API_BASE_URL || 'http://localhost:8000/api'
-  },
-
-  // Auth module configuration
-  auth: {
-    strategies: {
-      'laravelSanctum': {
-        provider: 'laravel/sanctum',
-        url: process.env.API_BASE_URL || 'http://localhost:8000'
-      }
-    },
-    redirect: {
-      login: '/login',
-      logout: '/login',
-      callback: '/login',
-      home: '/'
-    }
+  // Server configuration for Docker
+  server: {
+    host: '0.0.0.0',
+    port: 3000
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

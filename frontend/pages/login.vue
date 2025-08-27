@@ -70,9 +70,7 @@ export default {
     async login() {
       this.loading = true
       try {
-        await this.$auth.loginWith('laravelSanctum', {
-          data: this.form
-        })
+        await this.$auth.login(this.form)
         this.$router.push('/')
       } catch (error) {
         console.error('ログインに失敗しました:', error)

@@ -76,7 +76,13 @@ export default {
     async createBook() {
       this.loading = true
       try {
-        await this.$axios.post('/books', this.form)
+        if (this.$auth) {
+          await this.$auth.apiRequest('/api/books', {
+            method: 'POST',
+            body: JSON.stringify(this.form)
+          })
+        }
+        
         this.$router.push('/')
       } catch (error) {
         console.error('読書ログの作成に失敗しました:', error)

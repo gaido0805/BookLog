@@ -101,13 +101,17 @@ export default {
 
       this.loading = true
       try {
-        await this.$axios.post('/auth/register', this.form)
-        await this.$auth.loginWith('laravelSanctum', {
-          data: {
+        // ユーザー登録
+        if (this.$auth) {
+          await this.$auth.register(this.form)
+          
+          // 登録成功後、自動ログイン
+          await this.$auth.login({
             email: this.form.email,
             password: this.form.password
-          }
-        })
+          })
+        }
+        
         this.$router.push('/')
       } catch (error) {
         console.error('登録に失敗しました:', error)

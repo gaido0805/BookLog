@@ -21,6 +21,7 @@ Clean Architectureを使用した読書ログ管理システムです。
 - Vue.js
 - Tailwind CSS
 - Axios
+- js-cookie (認証トークン管理)
 
 ## プロジェクト構造
 
@@ -68,6 +69,7 @@ docker-compose up -d
 ```bash
 # APIコンテナに入る
 docker-compose exec api bash
+docker-compose exec api sh
 
 # アプリケーションキーの生成
 php artisan key:generate
@@ -82,7 +84,7 @@ chmod -R 775 storage bootstrap/cache
 ### 4. フロントエンド側のセットアップ
 ```bash
 # フロントエンドコンテナに入る
-docker-compose exec frontend bash
+docker-compose exec frontend sh
 
 # 依存関係のインストール
 npm install
@@ -93,6 +95,7 @@ npm install
 - フロントエンド: http://localhost:3000
 - API: http://localhost:8000
 - phpMyAdmin: http://localhost:8080
+- MySQL: localhost:3306
 
 ## Clean Architecture
 
@@ -129,6 +132,13 @@ docker-compose exec frontend npm run dev
 ```bash
 docker-compose exec api php artisan serve --host=0.0.0.0 --port=8000
 ```
+
+## 認証システム
+
+このプロジェクトでは、カスタム認証システムを使用しています：
+- Laravel Sanctumを使用したトークンベース認証
+- js-cookieを使用したクライアントサイドでのトークン管理
+- Axiosインターセプターによる自動的な認証ヘッダーの追加
 
 ## 注意事項
 
