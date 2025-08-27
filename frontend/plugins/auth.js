@@ -1,10 +1,16 @@
 import Cookies from 'js-cookie'
 
 export default function ({ app }, inject) {
-  console.log('認証プラグインが読み込まれました')
+  // 認証プラグインが読み込まれました
   
   // APIのベースURL
   const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8000'
+  
+  // 認証状態をリアクティブに管理
+  const authState = {
+    isAuthenticated: false,
+    user: null
+  }
   
   // 認証状態変更イベントを発火する関数
   const emitAuthChange = () => {
@@ -13,10 +19,15 @@ export default function ({ app }, inject) {
     }
   }
   
+  // 認証状態を更新する関数
+  const updateAuthState = () => {
+    authState.isAuthenticated = !!Cookies.get('auth_token')
+    emitAuthChange()
+  }
+  
   // 認証関連のメソッドをグローバルに追加
   const auth = {
     register: async (userData) => {
-      console.log('register メソッドが呼び出されました')
       try {
         const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
           method: 'POST',
@@ -33,7 +44,7 @@ export default function ({ app }, inject) {
         const data = await response.json()
         const token = data.token
         Cookies.set('auth_token', token, { expires: 7 })
-        emitAuthChange()
+        updateAuthState()
         return data
       } catch (error) {
         throw error
@@ -41,7 +52,6 @@ export default function ({ app }, inject) {
     },
     
     login: async (credentials) => {
-      console.log('login メソッドが呼び出されました', credentials)
       try {
         const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
           method: 'POST',
@@ -58,7 +68,7 @@ export default function ({ app }, inject) {
         const data = await response.json()
         const token = data.token
         Cookies.set('auth_token', token, { expires: 7 })
-        emitAuthChange()
+        updateAuthState()
         return data
       } catch (error) {
         console.error('ログインエラー:', error)
@@ -80,7 +90,7 @@ export default function ({ app }, inject) {
         console.error('Logout error:', error)
       } finally {
         Cookies.remove('auth_token')
-        emitAuthChange()
+        updateAuthState()
         // ログアウト後にログインページにリダイレクト
         if (app.router) {
           app.router.push('/login')
@@ -141,5 +151,4 @@ export default function ({ app }, inject) {
 
   // inject関数を使用して$authをグローバルに追加
   inject('auth', auth)
-  console.log('$auth が注入されました')
 }

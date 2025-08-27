@@ -122,6 +122,12 @@ export default {
         }
         
         await this.$auth.login(this.form)
+        
+        // 認証状態の更新を確実に行う
+        if (process.client) {
+          window.dispatchEvent(new CustomEvent('auth-state-changed'))
+        }
+        
         this.$router.push('/')
       } catch (error) {
         console.error('ログインに失敗しました:', error)
