@@ -12,7 +12,7 @@ Clean Architectureを使用した読書ログ管理システムです。
 ## 技術スタック
 
 ### バックエンド
-- Laravel 8 (Clean Architecture)
+- Laravel 10 (Clean Architecture)
 - MySQL 8.0
 - Docker
 
@@ -69,6 +69,7 @@ docker-compose up -d
 ```bash
 # APIコンテナに入る
 docker-compose exec api bash
+# または
 docker-compose exec api sh
 
 # .env
